@@ -69,9 +69,10 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
+	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self {
+		
+        let len_a = list_a.len();
+        let len_b = list_b.len()
 		Self {
             length: 0,
             start: None,
