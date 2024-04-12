@@ -2,13 +2,13 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
+use std::cmp::min;
 use std::vec::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Node<T> {
     val: T,
     next: Option<NonNull<Node<T>>>,
@@ -29,13 +29,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,15 +69,50 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self {
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self {
 		
-        let len_a = list_a.len();
-        let len_b = list_b.len()
-		Self {
+        let len_a = list_a.length;
+        let len_b = list_b.length;
+
+        let mut merge = Self {
             length: 0,
             start: None,
             end: None,
+        };
+
+        while list_b.start != None && list_a.start != None{
+            unsafe{
+            let sa_node = list_a.start.unwrap().as_ref() ;
+            let sb_node = list_b.start.unwrap().as_ref() ;
+            
+            
+                if (*sa_node).val <= (*sb_node).val {
+                    merge.add(std::ptr::read(sa_node).val);
+                    list_a.start = (*sa_node).next;
+                }
+                else{
+                    merge.add(std::ptr::read(sb_node).val);
+                    list_b.start = (*sb_node).next;
+                }
+            }
         }
+        
+        unsafe{
+                if list_b.start == None {
+                let mut end = unsafe{ merge.end.unwrap().as_ptr() };
+                (*end).next = list_a.start;
+                merge.end = list_a.end;
+                merge.length = len_a + len_b;
+            }
+            else{
+                let mut end = unsafe{ merge.end.unwrap().as_ptr() };
+                (*end).next = list_b.start;
+                merge.end = list_b.end;
+                merge.length = len_a + len_b;
+            }
+        }
+        
+		merge
 	}
 }
 

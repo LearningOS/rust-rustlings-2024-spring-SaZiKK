@@ -2,11 +2,10 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
-
+use std::mem::swap;
 pub struct Heap<T>
 where
     T: Default,
@@ -37,7 +36,19 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+
+        let mut now = self.count;
+        while now > 0 {
+            if self.children_present(now) {
+                let min_child = self.smallest_child_idx(now);
+                if (self.comparator)(&self.items[min_child], &self.items[now]) {
+                    self.items.swap(now, min_child);
+                }
+            }
+            now = self.parent_idx(now);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +68,17 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let child_l = self.left_child_idx(idx);
+        let child_r = self.right_child_idx(idx);
+
+        if child_r > self.len() {
+            return child_l;
+        } else {
+            return match (self.comparator)(&self.items[child_l], &self.items[child_r]) {
+                true => child_l,
+                false => child_r,
+            };
+        }
     }
 }
 
@@ -84,11 +104,27 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        let last = self.items.len() - 1;
+        self.items.swap(1, last);
+        self.count -= 1;
+
+        let mut now = self.count;
+        while now > 0 {
+            if self.children_present(now) {
+                let min_child = self.smallest_child_idx(now);
+                if (self.comparator)(&self.items[min_child], &self.items[now]) {
+                    self.items.swap(now, min_child);
+                }
+            }
+            now = self.parent_idx(now);
+        }
+        Some(self.items.pop().unwrap())
     }
 }
-
 pub struct MinHeap;
 
 impl MinHeap {
